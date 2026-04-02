@@ -334,6 +334,37 @@
     .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* History */
+    /* Chart */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .chart-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text2);
+      margin-bottom: 14px;
+    }
+
+    .chart-section .chart-empty {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    .chart-section canvas {
+      width: 100% !important;
+      height: 200px !important;
+      display: block;
+    }
+
     .history-section {
       margin-bottom: 40px;
     }
@@ -494,6 +525,11 @@
         </div>
       </div>
 
+      <div class="chart-section" id="chartSection">
+        <h3>Estimated 1RM Trend</h3>
+        <div id="chartContainer"></div>
+      </div>
+
       <div class="history-section">
         <h3>Recent History</h3>
         <div id="historyContent">
@@ -646,6 +682,7 @@
       rowCount = 0;
       addSetRow();
 
+      loadChart();
       loadHistory();
     }
 
@@ -690,6 +727,158 @@
     }
 
     addRowBtn.addEventListener('click', () => addSetRow());
+
+    // -- 1RM Trend Chart (pure canvas) --
+    async function loadChart() {
+      if (!currentExercise) return;
+
+      const container = document.getElementById('chartContainer');
+
+      const { data, error } = await sb
+        .from('workout_sets')
+        .select('workout_date, weight_lbs, reps')
+        .eq('exercise', currentExercise)
+        .order('workout_date', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<div class="chart-empty">Log 2+ workouts to see trends</div>';
+        return;
+      }
+
+      // Best e1RM per date
+      const e1rmByDate = {};
+      data.forEach(d => {
+        const e1rm = calc1RM(Number(d.weight_lbs), d.reps);
+        if (!e1rmByDate[d.workout_date] || e1rm > e1rmByDate[d.workout_date]) {
+          e1rmByDate[d.workout_date] = e1rm;
+        }
+      });
+
+      const dates = Object.keys(e1rmByDate);
+      const values = Object.values(e1rmByDate);
+
+      if (dates.length < 2) {
+        container.innerHTML = '<div class="chart-empty">Log 2+ workouts to see trends</div>';
+        return;
+      }
+
+      // Create / reuse canvas
+      let canvas = container.querySelector('canvas');
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        container.innerHTML = '';
+        container.appendChild(canvas);
+      }
+
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.parentElement.clientWidth;
+      const cssH = 200;
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      // Layout
+      const padL = 48, padR = 20, padT = 20, padB = 36;
+      const plotW = cssW - padL - padR;
+      const plotH = cssH - padT - padB;
+
+      const minV = Math.floor(Math.min(...values) * 0.95);
+      const maxV = Math.ceil(Math.max(...values) * 1.05);
+      const rangeV = maxV - minV || 1;
+
+      function xPos(i) { return padL + (i / (dates.length - 1)) * plotW; }
+      function yPos(v) { return padT + plotH - ((v - minV) / rangeV) * plotH; }
+
+      // Y-axis gridlines
+      const gridCount = 4;
+      ctx.font = '500 11px "DM Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      for (let i = 0; i <= gridCount; i++) {
+        const v = minV + (rangeV * i / gridCount);
+        const y = yPos(v);
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(cssW - padR, y);
+        ctx.stroke();
+        ctx.fillStyle = '#6b7280';
+        ctx.fillText(Math.round(v), padL - 8, y);
+      }
+
+      // X-axis date labels (show up to 5)
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.font = '500 10px "DM Sans", sans-serif';
+      ctx.fillStyle = '#6b7280';
+      const labelStep = Math.max(1, Math.floor(dates.length / 5));
+      for (let i = 0; i < dates.length; i += labelStep) {
+        const label = new Date(dates[i] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        ctx.fillText(label, xPos(i), cssH - padB + 10);
+      }
+      // Always show last label
+      if ((dates.length - 1) % labelStep !== 0) {
+        const label = new Date(dates[dates.length - 1] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        ctx.fillText(label, xPos(dates.length - 1), cssH - padB + 10);
+      }
+
+      // Area fill gradient
+      const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+      grad.addColorStop(0, 'rgba(37, 99, 235, 0.18)');
+      grad.addColorStop(1, 'rgba(37, 99, 235, 0.02)');
+
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(values[0]));
+      for (let i = 1; i < values.length; i++) {
+        ctx.lineTo(xPos(i), yPos(values[i]));
+      }
+      ctx.lineTo(xPos(values.length - 1), padT + plotH);
+      ctx.lineTo(xPos(0), padT + plotH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(values[0]));
+      for (let i = 1; i < values.length; i++) {
+        ctx.lineTo(xPos(i), yPos(values[i]));
+      }
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Data points
+      for (let i = 0; i < values.length; i++) {
+        const isLast = i === values.length - 1;
+        const r = isLast ? 5.5 : 3.5;
+        ctx.beginPath();
+        ctx.arc(xPos(i), yPos(values[i]), r, 0, Math.PI * 2);
+        ctx.fillStyle = '#2563eb';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Label on last point
+      const lastX = xPos(values.length - 1);
+      const lastY = yPos(values[values.length - 1]);
+      const labelText = values[values.length - 1] + ' lbs';
+      ctx.font = '600 12px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText(labelText, lastX, lastY - 10);
+    }
 
     // -- Load History --
     async function loadHistory() {
@@ -749,6 +938,7 @@
         return;
       }
       showToast('Entry deleted');
+      loadChart();
       loadHistory();
     }
 
@@ -803,6 +993,7 @@
       addSetRow();
       notesInput.value = '';
 
+      loadChart();
       loadHistory();
     });
 
