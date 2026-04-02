@@ -10,22 +10,20 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>Barbell Log</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f5f5f5;
       --surface: #ffffff;
       --surface2: #f0f0f0;
-      --border: #e0e0e0;
-      --text: #1a1a1a;
-      --text2: #555;
-      --accent: #d63600;
-      --accent-dim: #d6360020;
-      --green: #00873a;
-      --green-dim: #00873a18;
-      --yellow: #c49900;
-      --red: #d32f2f;
-      --radius: 12px;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text2: #6b7280;
+      --accent: #2563eb;
+      --accent-light: #2563eb10;
+      --green: #059669;
+      --red: #dc2626;
+      --radius: 14px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
@@ -33,7 +31,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100dvh;
@@ -44,7 +42,7 @@
     }
 
     .app-header {
-      padding: 20px 20px 16px;
+      padding: 20px 20px 8px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -68,127 +66,125 @@
 
     .app-header h1 span { color: var(--accent); }
 
+    .app-header .back-btn {
+      width: 36px; height: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .app-header .back-btn:hover { background: var(--surface2); }
+
+    .app-header .back-btn svg {
+      width: 20px; height: 20px;
+      stroke: var(--text);
+    }
+
     .container {
       padding: 0 16px;
       max-width: 480px;
       margin: 0 auto;
     }
 
-    /* Exercise Selector */
-    .exercise-select-wrap {
-      position: relative;
-      margin-bottom: 20px;
-    }
-
-    .exercise-select-wrap select {
-      width: 100%;
-      height: 56px;
-      padding: 0 20px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      background: var(--surface);
-      color: var(--text);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c62828' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      background-size: 18px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    .exercise-select-wrap select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    /* Stats Banner */
-    .stats-banner {
-      display: none;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .stats-banner.visible { display: grid; }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-    }
-
-    .stat-card.max-card { border-color: var(--accent-dim); border-left: 3px solid var(--accent); }
-    .stat-card.e1rm-card { border-color: var(--green-dim); border-left: 3px solid var(--green); }
-    .stat-card.volume-card { border-color: var(--border); border-left: 3px solid var(--text); }
-
-    .stat-label {
-      font-size: 11px;
+    /* ---- DASHBOARD ---- */
+    .dashboard-title {
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--text2);
+      padding: 16px 4px 10px;
+    }
+
+    .exercise-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 24px;
+    }
+
+    .exercise-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 14px 16px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .exercise-card:active { transform: scale(0.98); background: var(--surface2); }
+
+    .exercise-card .card-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .exercise-card .card-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
       margin-bottom: 4px;
     }
 
-    .stat-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 34px;
-      font-weight: 700;
+    .exercise-card .card-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+    }
+
+    .exercise-card .card-stat {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    .exercise-card .card-stat strong {
+      font-weight: 600;
       color: var(--text);
     }
 
-    .stat-unit {
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text2);
-      margin-left: 2px;
+    .exercise-card .card-stat.e1rm strong {
+      color: var(--accent);
     }
 
-    .stat-card.max-card .stat-value { color: var(--accent); }
-    .stat-card.e1rm-card .stat-value { color: var(--green); }
-    .stat-card.volume-card .stat-value { color: var(--text); }
-
-    .stat-sub {
+    .exercise-card .card-meta {
       font-size: 12px;
       color: var(--text2);
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
-    /* Volume row spans full width */
-    .volume-row {
-      display: none;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .volume-row.visible { display: grid; }
-
-    /* Chart */
-    .chart-section {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .chart-section.visible { display: block; }
-
-    .chart-section h3 {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .exercise-card .card-empty {
+      font-size: 13px;
       color: var(--text2);
-      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    .exercise-card .chevron {
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+
+    .exercise-card .chevron svg {
+      width: 20px; height: 20px;
+      stroke: var(--text2);
+    }
+
+    /* ---- DETAIL PAGE ---- */
+    .detail-page { display: none; }
+    .detail-page.active { display: block; }
+    .dashboard-page.hidden { display: none; }
+
+    .detail-exercise-name {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 8px 4px 16px;
+      color: var(--text);
     }
 
     /* Log Form */
@@ -201,7 +197,7 @@
     }
 
     .log-section h3 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -233,13 +229,13 @@
       margin-bottom: 6px;
     }
 
-    .input-group input {
+    .input-group input, .notes-input {
       width: 100%;
-      height: 52px;
+      height: 50px;
       padding: 0 14px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 19px;
-      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
       background: var(--surface2);
       color: var(--text);
       border: 1.5px solid var(--border);
@@ -248,15 +244,22 @@
       transition: border-color 0.2s;
     }
 
-    .input-group input:focus {
+    .input-group input:focus, .notes-input:focus {
       outline: none;
       border-color: var(--accent);
     }
 
-    .input-group input::placeholder { color: #bbb; }
+    .input-group input::placeholder, .notes-input::placeholder { color: #bbb; }
+
+    .notes-input {
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
 
     .remove-row-btn {
-      width: 36px; height: 52px;
+      width: 36px; height: 50px;
       background: none;
       border: 1.5px solid var(--border);
       border-radius: 12px;
@@ -267,19 +270,19 @@
       transition: all 0.15s;
     }
 
-    .remove-row-btn:hover { background: #ff17441a; border-color: var(--red); }
+    .remove-row-btn:hover { background: #dc26261a; border-color: var(--red); }
 
     .date-row {
       display: flex;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .date-row input[type="date"] {
       flex: 1;
-      height: 52px;
+      height: 50px;
       padding: 0 14px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 14px;
       background: var(--surface2);
       color: var(--text);
@@ -298,9 +301,9 @@
     }
 
     .btn-add-row {
-      height: 52px;
+      height: 50px;
       padding: 0 14px;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: 14px;
       font-weight: 600;
       background: var(--surface2);
@@ -315,8 +318,8 @@
 
     .btn-save {
       width: 100%;
-      padding: 18px;
-      font-family: 'Space Grotesk', sans-serif;
+      padding: 16px;
+      font-family: 'DM Sans', sans-serif;
       font-size: 17px;
       font-weight: 700;
       background: var(--accent);
@@ -336,7 +339,7 @@
     }
 
     .history-section h3 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -375,37 +378,26 @@
     .history-entry {
       display: grid;
       grid-template-columns: 1fr auto auto;
-      gap: 16px;
-      padding: 14px 16px;
+      gap: 12px;
+      padding: 12px 16px;
       align-items: center;
       border-bottom: 1px solid var(--border);
     }
 
     .history-entry:last-child { border-bottom: none; }
 
-    .history-entry:nth-child(odd) { background: #fafafa; }
-    .history-entry:nth-child(even) { background: #ffffff; }
-
     .history-entry .he-sets-reps {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 17px;
-      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
       color: var(--text);
-      padding-left: 4px;
     }
 
     .history-entry .he-weight {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 19px;
-      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      font-size: 17px;
+      font-weight: 500;
       color: var(--accent);
-    }
-
-    .history-entry .he-e1rm {
-      font-size: 12px;
-      color: var(--green);
-      font-weight: 600;
-      text-align: right;
     }
 
     .delete-entry {
@@ -418,7 +410,7 @@
       border-radius: 4px;
       transition: all 0.15s;
     }
-    .delete-entry:hover { color: var(--red); background: #ff17441a; }
+    .delete-entry:hover { color: var(--red); background: #dc26261a; }
 
     /* Toast */
     .toast {
@@ -442,7 +434,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Loading spinner */
     .spinner {
       display: inline-block;
       width: 16px; height: 16px;
@@ -462,74 +453,52 @@
   </style>
 </head>
 <body>
-  <div class="app-header">
-    <div class="logo">B</div>
-    <h1>Barbell<span>Log</span></h1>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="dashboard-page" id="dashboardPage">
+    <div class="app-header">
+      <div class="logo">B</div>
+      <h1>Barbell<span>Log</span></h1>
+    </div>
+    <div class="container">
+      <div class="dashboard-title">Exercises</div>
+      <div class="exercise-cards" id="exerciseCards">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
   </div>
 
-  <div class="container">
-    <!-- Exercise Selector -->
-    <div class="exercise-select-wrap">
-      <select id="exerciseSelect">
-        <option value="" disabled selected>Choose Exercise</option>
-        <option>Back Squat</option>
-        <option>Front Squat</option>
-        <option>Snatch</option>
-        <option>Push Press</option>
-        <option>Strict Press</option>
-        <option>Jerk</option>
-        <option>Hang Clean</option>
-        <option>Hang Clean & Jerk</option>
-      </select>
+  <!-- DETAIL PAGE -->
+  <div class="detail-page" id="detailPage">
+    <div class="app-header">
+      <button class="back-btn" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <h1>Barbell<span>Log</span></h1>
     </div>
+    <div class="container">
+      <div class="detail-exercise-name" id="detailExerciseName"></div>
 
-    <!-- Stats Banner -->
-    <div class="stats-banner" id="statsBanner">
-      <div class="stat-card max-card">
-        <div class="stat-label">Current Max</div>
-        <div class="stat-value"><span id="currentMax">&mdash;</span><span class="stat-unit" id="maxUnit"></span></div>
-        <div class="stat-sub" id="maxDetail"></div>
+      <div class="log-section">
+        <h3>Log Workout</h3>
+        <div class="date-row">
+          <input type="date" id="workoutDate">
+        </div>
+        <div id="setRows"></div>
+        <input type="text" class="notes-input" id="notesInput" placeholder="Notes (optional)">
+        <div class="form-actions">
+          <button class="btn-add-row" id="addRowBtn">+ Add Row</button>
+          <button class="btn-save" id="saveBtn">Save Workout</button>
+        </div>
       </div>
-      <div class="stat-card e1rm-card">
-        <div class="stat-label">Est. 1RM</div>
-        <div class="stat-value"><span id="estimated1RM">&mdash;</span><span class="stat-unit" id="e1rmUnit"></span></div>
-        <div class="stat-sub" id="e1rmDetail"></div>
-      </div>
-    </div>
 
-    <!-- Volume Row -->
-    <div class="volume-row" id="volumeRow">
-      <div class="stat-card volume-card">
-        <div class="stat-label">Today's Volume</div>
-        <div class="stat-value"><span id="todayVolume">&mdash;</span><span class="stat-unit" id="volUnit"></span></div>
-        <div class="stat-sub" id="volumeDetail"></div>
-      </div>
-    </div>
-
-    <!-- Progress Chart -->
-    <div class="chart-section" id="chartSection">
-      <h3>Max Weight Over Time</h3>
-      <canvas id="progressChart" height="200"></canvas>
-    </div>
-
-    <!-- Log Form -->
-    <div class="log-section" id="logSection" style="display:none">
-      <h3>Log Workout</h3>
-      <div class="date-row">
-        <input type="date" id="workoutDate">
-      </div>
-      <div id="setRows"></div>
-      <div class="form-actions">
-        <button class="btn-add-row" id="addRowBtn">+ Row</button>
-        <button class="btn-save" id="saveBtn">Save Workout</button>
-      </div>
-    </div>
-
-    <!-- History -->
-    <div class="history-section" id="historySection" style="display:none">
-      <h3>History</h3>
-      <div id="historyContent">
-        <div class="loading-state"><div class="spinner"></div></div>
+      <div class="history-section">
+        <h3>Recent History</h3>
+        <div id="historyContent">
+          <div class="loading-state"><div class="spinner"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -537,35 +506,34 @@
   <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script>
     // -- Supabase Init --
     const SUPABASE_URL = 'https://nzinvxticgyjobkqxxhl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56aW52eHRpY2d5am9ia3F4eGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NTUwOTIsImV4cCI6MjA4NDUzMTA5Mn0.YhaW1zesBaEC6lRMWx6_gyZN5Uhh8FX2wgahunHQfok';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    const EXERCISES = [
+      'Back Squat', 'Front Squat', 'Snatch', 'Push Press',
+      'Strict Press', 'Jerk', 'Hang Clean', 'Hang Clean & Jerk'
+    ];
+
     // -- DOM --
-    const exerciseSelect = document.getElementById('exerciseSelect');
-    const statsBanner = document.getElementById('statsBanner');
-    const volumeRow = document.getElementById('volumeRow');
-    const chartSection = document.getElementById('chartSection');
-    const logSection = document.getElementById('logSection');
-    const historySection = document.getElementById('historySection');
+    const dashboardPage = document.getElementById('dashboardPage');
+    const detailPage = document.getElementById('detailPage');
+    const exerciseCardsEl = document.getElementById('exerciseCards');
+    const detailExerciseName = document.getElementById('detailExerciseName');
     const setRows = document.getElementById('setRows');
     const saveBtn = document.getElementById('saveBtn');
     const addRowBtn = document.getElementById('addRowBtn');
     const workoutDate = document.getElementById('workoutDate');
+    const notesInput = document.getElementById('notesInput');
+    const backBtn = document.getElementById('backBtn');
     const toast = document.getElementById('toast');
 
-    // -- State --
     let currentExercise = '';
     let rowCount = 0;
-    let progressChart = null;
 
-    // -- Init --
-    workoutDate.value = new Date().toISOString().split('T')[0];
-
-    // -- Epley 1RM Formula --
+    // -- Epley 1RM --
     function calc1RM(weight, reps) {
       if (reps === 1) return weight;
       return Math.round(weight * (1 + reps / 30));
@@ -578,8 +546,121 @@
       setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    // -- Add a set row --
-    function addSetRow(sets = '', reps = '', weight = '') {
+    // -- Relative date --
+    function relativeDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const diff = Math.floor((now - d) / 86400000);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7) return `${diff} days ago`;
+      if (diff < 14) return '1 week ago';
+      if (diff < 30) return `${Math.floor(diff / 7)} weeks ago`;
+      if (diff < 60) return '1 month ago';
+      return `${Math.floor(diff / 30)} months ago`;
+    }
+
+    function formatDateLong(d) {
+      return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
+    }
+
+    // -- DASHBOARD --
+    async function loadDashboard() {
+      exerciseCardsEl.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+
+      const { data, error } = await sb
+        .from('workout_sets')
+        .select('*')
+        .order('workout_date', { ascending: false })
+        .order('weight_lbs', { ascending: false });
+
+      const byExercise = {};
+      if (data) {
+        data.forEach(d => {
+          if (!byExercise[d.exercise]) byExercise[d.exercise] = [];
+          byExercise[d.exercise].push(d);
+        });
+      }
+
+      let html = '';
+      EXERCISES.forEach(name => {
+        const entries = byExercise[name] || [];
+        html += `<div class="exercise-card" data-exercise="${name}">`;
+        html += '<div class="card-left">';
+        html += `<div class="card-name">${name}</div>`;
+
+        if (entries.length > 0) {
+          // Last workout: heaviest set from most recent session
+          const lastDate = entries[0].workout_date;
+          const lastSession = entries.filter(e => e.workout_date === lastDate);
+          const heaviest = lastSession.reduce((a, b) => Number(a.weight_lbs) >= Number(b.weight_lbs) ? a : b);
+
+          // Best all-time e1RM
+          let best1RM = 0;
+          entries.forEach(e => {
+            const e1rm = calc1RM(Number(e.weight_lbs), e.reps);
+            if (e1rm > best1RM) best1RM = e1rm;
+          });
+
+          // Total sets in last session
+          const totalSets = lastSession.reduce((s, e) => s + e.sets, 0);
+
+          html += '<div class="card-stats">';
+          html += `<div class="card-stat">Last: <strong>${Number(heaviest.weight_lbs)} × ${heaviest.reps}</strong></div>`;
+          html += `<div class="card-stat e1rm">1RM: <strong>${best1RM} lbs</strong></div>`;
+          html += '</div>';
+          html += `<div class="card-meta">${relativeDate(lastDate)} · ${totalSets} set${totalSets !== 1 ? 's' : ''}</div>`;
+        } else {
+          html += '<div class="card-empty">No sets logged yet</div>';
+        }
+
+        html += '</div>';
+        html += '<div class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>';
+        html += '</div>';
+      });
+
+      exerciseCardsEl.innerHTML = html;
+
+      // Attach click handlers
+      exerciseCardsEl.querySelectorAll('.exercise-card').forEach(card => {
+        card.addEventListener('click', () => {
+          openExercise(card.dataset.exercise);
+        });
+      });
+    }
+
+    // -- Navigate to detail --
+    function openExercise(name) {
+      currentExercise = name;
+      detailExerciseName.textContent = name;
+      dashboardPage.classList.add('hidden');
+      detailPage.classList.add('active');
+
+      // Reset form
+      workoutDate.value = new Date().toISOString().split('T')[0];
+      notesInput.value = '';
+      setRows.innerHTML = '';
+      rowCount = 0;
+      addSetRow();
+
+      loadHistory();
+    }
+
+    // -- Navigate back --
+    function goBack() {
+      detailPage.classList.remove('active');
+      dashboardPage.classList.remove('hidden');
+      currentExercise = '';
+      loadDashboard();
+    }
+
+    backBtn.addEventListener('click', goBack);
+
+    // -- Add set row --
+    function addSetRow(weight = '', reps = '', sets = '') {
       rowCount++;
       const id = rowCount;
       const row = document.createElement('div');
@@ -587,16 +668,16 @@
       row.id = `row-${id}`;
       row.innerHTML = `
         <div class="input-group">
-          <label>Sets</label>
-          <input type="number" inputmode="numeric" placeholder="3" min="1" value="${sets}" data-field="sets">
+          <label>Weight</label>
+          <input type="number" inputmode="decimal" placeholder="225" min="1" value="${weight}" data-field="weight">
         </div>
         <div class="input-group">
           <label>Reps</label>
           <input type="number" inputmode="numeric" placeholder="5" min="1" value="${reps}" data-field="reps">
         </div>
         <div class="input-group">
-          <label>Weight</label>
-          <input type="number" inputmode="decimal" placeholder="225" min="1" value="${weight}" data-field="weight">
+          <label>Sets</label>
+          <input type="number" inputmode="numeric" placeholder="3" min="1" value="${sets}" data-field="sets">
         </div>
         <button class="remove-row-btn" onclick="removeRow(${id})" title="Remove">\u00d7</button>
       `;
@@ -605,174 +686,10 @@
 
     function removeRow(id) {
       const row = document.getElementById(`row-${id}`);
-      if (row && setRows.children.length > 1) {
-        row.remove();
-      }
+      if (row && setRows.children.length > 1) row.remove();
     }
-
-    // -- Exercise Change --
-    exerciseSelect.addEventListener('change', async () => {
-      currentExercise = exerciseSelect.value;
-      logSection.style.display = 'block';
-      historySection.style.display = 'block';
-
-      // Reset form rows
-      setRows.innerHTML = '';
-      rowCount = 0;
-      addSetRow();
-
-      // Load stats + history
-      await Promise.all([loadStats(), loadHistory()]);
-    });
 
     addRowBtn.addEventListener('click', () => addSetRow());
-
-    // -- Load Stats --
-    async function loadStats() {
-      if (!currentExercise) return;
-
-      const { data, error } = await sb
-        .from('workout_sets')
-        .select('*')
-        .eq('exercise', currentExercise)
-        .order('weight_lbs', { ascending: false })
-        .limit(50);
-
-      if (error || !data || data.length === 0) {
-        statsBanner.classList.remove('visible');
-        volumeRow.classList.remove('visible');
-        chartSection.classList.remove('visible');
-        return;
-      }
-
-      statsBanner.classList.add('visible');
-
-      // Current Max (heaviest weight lifted)
-      const maxEntry = data[0];
-      document.getElementById('currentMax').textContent = `${Number(maxEntry.weight_lbs)}`;
-      document.getElementById('maxUnit').textContent = ' lbs';
-      document.getElementById('maxDetail').textContent = `${maxEntry.sets}\u00d7${maxEntry.reps} on ${formatDate(maxEntry.workout_date)}`;
-
-      // Best estimated 1RM across all entries
-      let best1RM = 0;
-      let best1RMEntry = null;
-      data.forEach(d => {
-        const e1rm = calc1RM(Number(d.weight_lbs), d.reps);
-        if (e1rm > best1RM) {
-          best1RM = e1rm;
-          best1RMEntry = d;
-        }
-      });
-
-      document.getElementById('estimated1RM').textContent = `${best1RM}`;
-      document.getElementById('e1rmUnit').textContent = ' lbs';
-      if (best1RMEntry) {
-        document.getElementById('e1rmDetail').textContent =
-          `from ${Number(best1RMEntry.weight_lbs)}\u00d7${best1RMEntry.reps}`;
-      }
-
-      // Today's volume
-      const today = new Date().toISOString().split('T')[0];
-      const todayEntries = data.filter(d => d.workout_date === today);
-      if (todayEntries.length > 0) {
-        const totalVolume = todayEntries.reduce((sum, d) => sum + (d.sets * d.reps * Number(d.weight_lbs)), 0);
-        document.getElementById('todayVolume').textContent = totalVolume.toLocaleString();
-        document.getElementById('volUnit').textContent = ' lbs';
-        document.getElementById('volumeDetail').textContent = `${todayEntries.length} entries today`;
-        volumeRow.classList.add('visible');
-      } else {
-        volumeRow.classList.remove('visible');
-      }
-
-      // Build progress chart
-      await loadChart();
-    }
-
-    // -- Load Progress Chart --
-    async function loadChart() {
-      if (!currentExercise) return;
-
-      const { data, error } = await sb
-        .from('workout_sets')
-        .select('workout_date, weight_lbs')
-        .eq('exercise', currentExercise)
-        .order('workout_date', { ascending: true });
-
-      if (error || !data || data.length === 0) {
-        chartSection.classList.remove('visible');
-        return;
-      }
-
-      // Get max weight per date
-      const maxByDate = {};
-      data.forEach(d => {
-        const dt = d.workout_date;
-        const w = Number(d.weight_lbs);
-        if (!maxByDate[dt] || w > maxByDate[dt]) {
-          maxByDate[dt] = w;
-        }
-      });
-
-      const dates = Object.keys(maxByDate);
-      const weights = Object.values(maxByDate);
-
-      if (dates.length < 2) {
-        chartSection.classList.remove('visible');
-        return;
-      }
-
-      chartSection.classList.add('visible');
-
-      const ctx = document.getElementById('progressChart').getContext('2d');
-
-      if (progressChart) {
-        progressChart.destroy();
-      }
-
-      progressChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: dates.map(d => formatDate(d)),
-          datasets: [{
-            label: 'Max Weight (lbs)',
-            data: weights,
-            borderColor: '#d63600',
-            backgroundColor: '#d6360020',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#d63600',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.3,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: {
-              ticks: {
-                font: { size: 14, family: 'Space Grotesk' },
-                color: '#555',
-                maxTicksLimit: 6
-              },
-              grid: { color: '#e0e0e0' }
-            },
-            y: {
-              ticks: {
-                font: { size: 14, family: 'JetBrains Mono' },
-                color: '#555',
-                callback: v => v + ' lbs'
-              },
-              grid: { color: '#e0e0e0' }
-            }
-          }
-        }
-      });
-    }
 
     // -- Load History --
     async function loadHistory() {
@@ -795,28 +712,25 @@
       }
 
       if (!data || data.length === 0) {
-        content.innerHTML = '<div class="history-empty">No history yet \u2014 log your first set!</div>';
+        content.innerHTML = '<div class="history-empty">No history yet — log your first set!</div>';
         return;
       }
 
-      // Group by date
       const groups = {};
       data.forEach(d => {
-        const dt = d.workout_date;
-        if (!groups[dt]) groups[dt] = [];
-        groups[dt].push(d);
+        if (!groups[d.workout_date]) groups[d.workout_date] = [];
+        groups[d.workout_date].push(d);
       });
 
       let html = '';
       Object.entries(groups).forEach(([date, entries]) => {
         html += `<div class="history-group"><div class="history-date">${formatDateLong(date)}</div><div class="history-card">`;
         entries.forEach(e => {
-          const e1rm = calc1RM(Number(e.weight_lbs), e.reps);
           html += `
             <div class="history-entry">
-              <div class="he-sets-reps">${e.sets} \u00d7 ${e.reps}</div>
-              <div class="he-weight">${Number(e.weight_lbs)} lbs</div>
-              <div class="he-e1rm">e1RM ${e1rm}</div>
+              <div class="he-sets-reps">${e.sets} × ${e.reps} @ ${Number(e.weight_lbs)} lbs</div>
+              <div class="he-weight">e1RM ${calc1RM(Number(e.weight_lbs), e.reps)}</div>
+              <button class="delete-entry" onclick="deleteEntry(${e.id})" title="Delete">✕</button>
             </div>`;
         });
         html += '</div></div>';
@@ -825,26 +739,41 @@
       content.innerHTML = html;
     }
 
+    // -- Delete entry --
+    async function deleteEntry(id) {
+      if (!confirm('Delete this entry?')) return;
+
+      const { error } = await sb.from('workout_sets').delete().eq('id', id);
+      if (error) {
+        showToast('Error deleting');
+        return;
+      }
+      showToast('Entry deleted');
+      loadHistory();
+    }
+
     // -- Save Workout --
     saveBtn.addEventListener('click', async () => {
       if (!currentExercise) return;
 
       const rows = setRows.querySelectorAll('.set-row');
       const entries = [];
+      const notes = notesInput.value.trim() || null;
 
       for (const row of rows) {
-        const sets = parseInt(row.querySelector('[data-field="sets"]').value);
-        const reps = parseInt(row.querySelector('[data-field="reps"]').value);
         const weight = parseFloat(row.querySelector('[data-field="weight"]').value);
+        const reps = parseInt(row.querySelector('[data-field="reps"]').value);
+        const sets = parseInt(row.querySelector('[data-field="sets"]').value);
 
-        if (!sets || !reps || !weight) continue;
+        if (!weight || !reps || !sets) continue;
 
         entries.push({
           exercise: currentExercise,
           sets,
           reps,
           weight_lbs: weight,
-          workout_date: workoutDate.value
+          workout_date: workoutDate.value,
+          notes
         });
       }
 
@@ -862,34 +791,25 @@
       saveBtn.textContent = 'Save Workout';
 
       if (error) {
-        showToast('Error saving \u2014 try again');
+        showToast('Error saving — try again');
         console.error(error);
         return;
       }
 
-      showToast('Workout saved \u2713');
+      showToast('Workout saved ✓');
 
-      // Reset form
       setRows.innerHTML = '';
       rowCount = 0;
       addSetRow();
+      notesInput.value = '';
 
-      // Reload stats + history
-      await Promise.all([loadStats(), loadHistory()]);
+      loadHistory();
     });
 
-    // -- Date Formatters --
-    function formatDate(d) {
-      return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
+    // -- Init --
+    loadDashboard();
 
-    function formatDateLong(d) {
-      return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-      });
-    }
-
-    // -- Service Worker Registration --
+    // -- Service Worker --
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
