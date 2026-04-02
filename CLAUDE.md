@@ -1,13 +1,16 @@
 # Barbell Log — Weight Training Tracker
 
 ## Project Overview
-Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and weight for Olympic and powerlifting movements. Calculates estimated 1RM using the Epley formula. All data stored in Supabase.
+Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and weight for 8 Olympic and powerlifting movements. Calculates estimated 1RM using the Epley formula. All data stored in Supabase with a single-file frontend deployed on Netlify.
 
 ## Tech Stack
-- **Frontend**: Single-file HTML/CSS/JS (no build step)
-- **Backend**: Supabase (PostgreSQL + REST API)
-- **Hosting**: Netlify (static site)
-- **PWA**: Service worker + manifest for home screen install
+- **Frontend**: Single-file HTML/CSS/JS (`index.html`) — no build step, no bundler
+- **Fonts**: DM Sans (UI) + DM Mono (numeric data) via Google Fonts
+- **Design**: White/light theme, blue accent (`#2563eb`), 14px border radius, mobile-first
+- **Backend**: Supabase (PostgreSQL + REST API via `@supabase/supabase-js` v2 CDN)
+- **Hosting**: Netlify (static site, auto-deploys on push to `master`)
+- **PWA**: Service worker (`sw.js`) + manifest (`manifest.json`) for home screen install
+- **Charts**: Pure canvas rendering (no Chart.js or external chart library)
 
 ## Supabase Details
 - **Project**: Gridiron Performance
@@ -17,17 +20,17 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 - **RLS**: Disabled (single-user app)
 
 ## Database Schema — `workout_sets`
-| Column       | Type       | Notes                                    |
-|-------------|------------|------------------------------------------|
-| id          | bigint     | Auto-generated identity                  |
-| exercise    | text       | CHECK constraint for valid exercises     |
-| sets        | integer    | Number of sets (≥1)                      |
-| reps        | integer    | Reps per set (≥1)                        |
-| weight_lbs  | numeric    | Weight in pounds (>0)                    |
-| workout_date| date       | Defaults to CURRENT_DATE                 |
-| notes       | text       | Optional                                 |
-| created_at  | timestamptz| Auto                                     |
-| updated_at  | timestamptz| Auto                                     |
+| Column       | Type        | Constraints / Notes                      |
+|-------------|-------------|------------------------------------------|
+| id          | bigint      | Auto-generated identity (PK)             |
+| exercise    | text        | CHECK constraint for 8 valid exercises   |
+| sets        | integer     | Number of sets (CHECK >= 1)              |
+| reps        | integer     | Reps per set (CHECK >= 1)                |
+| weight_lbs  | numeric     | Weight in pounds (CHECK > 0)             |
+| workout_date| date        | Defaults to CURRENT_DATE                 |
+| notes       | text        | Optional, nullable                       |
+| created_at  | timestamptz | Auto-set on insert                       |
+| updated_at  | timestamptz | Auto-set on insert/update                |
 
 ## Valid Exercises
 Back Squat, Front Squat, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Hang Clean & Jerk
@@ -37,48 +40,78 @@ Back Squat, Front Squat, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Han
 - `idx_workout_sets_date` — date-sorted queries
 - `idx_workout_sets_exercise_date` — combined exercise + date
 
-## Key Features
-- Exercise dropdown with 8 barbell movements
-- Multi-row set entry (add rows for different rep schemes)
-- Current max weight display per exercise
-- Estimated 1RM using Epley formula: `weight × (1 + reps/30)`
-- Chronological workout history grouped by date
-- PWA installable on mobile home screen
-- Dark theme optimized for gym use
+## App Architecture
+
+### Dashboard Page
+- Shows all 8 exercises as tappable cards
+- Each card displays:
+  - Exercise name with SVG right chevron
+  - **Last workout**: heaviest set from most recent session (weight x reps)
+  - **Estimated 1RM**: best all-time Epley calculation (`weight * (1 + reps/30)`)
+  - Relative date (e.g. "2 days ago") and total set count from last session
+  - "No sets logged yet" for exercises with no data
+- Single Supabase query fetches all data, grouped client-side by exercise
+
+### Exercise Detail Page
+- Navigated to by tapping a dashboard card
+- Back button returns to dashboard (reloads dashboard data)
+- **Log Workout form**: weight, reps, sets inputs + date picker + optional notes field + add row button
+- **1RM Trend Chart**: pure canvas line chart between log form and history
+  - Best estimated 1RM per workout date
+  - Blue gradient area fill under the line
+  - Y-axis gridlines with weight labels, X-axis date labels
+  - Last data point highlighted with larger dot + value label
+  - High-DPI canvas rendering (devicePixelRatio scaling)
+  - Shows "Log 2+ workouts to see trends" placeholder when < 2 dates
+- **Recent History**: grouped by date, each entry shows sets x reps @ weight + e1RM
+  - Delete button on each entry (with confirm dialog)
+- Chart and history re-render on save and delete
+
+### Key Formulas
+- **Epley 1RM**: `weight * (1 + reps / 30)` — returns raw weight when reps = 1
+- **Relative dates**: Today, Yesterday, N days ago, N weeks ago, N months ago
 
 ## File Structure
 ```
 barbell-tracker/
-├── index.html       # Full app (HTML + CSS + JS)
+├── index.html       # Full app (HTML + CSS + JS in single file)
 ├── manifest.json    # PWA manifest
-├── sw.js            # Service worker
-├── icon-192.png     # PWA icon
-├── icon-512.png     # PWA icon
-├── netlify.toml     # Netlify config
+├── sw.js            # Service worker for offline caching
+├── icon-192.png     # PWA icon (192x192)
+├── icon-512.png     # PWA icon (512x512)
+├── netlify.toml     # Netlify deployment config
 └── CLAUDE.md        # This file
 ```
 
 ## Deployment
-- Push to GitHub repo
-- Connect repo to Netlify
-- Auto-deploys on push to main
+- GitHub repo: `MschneckGrid/barbell-tracker`
+- Branch: `master` (not main)
+- Push to `master` triggers Netlify auto-deploy
+- No build command needed — static files served directly
 
-## Common Claude Code Commands
+## Development
 ```bash
 # Run locally
 npx serve .
 
-# Push to GitHub
-git add -A && git commit -m "update" && git push
+# Add new exercise
+# 1. Update CHECK constraint in Supabase SQL editor
+# 2. Add to EXERCISES array in index.html JS
 
-# Add new exercise to the CHECK constraint
-# UPDATE the CHECK in Supabase SQL editor AND the <select> in index.html
+# Commit and deploy
+git add index.html && git commit -m "feat: description" && git push origin master
 ```
 
+## Design Decisions
+- Single-file architecture keeps deployment simple and avoids build tooling
+- No external chart library — pure canvas for the 1RM trend chart reduces bundle size
+- SVG icons inline (chevrons, back arrow) instead of icon fonts or CSS unicode
+- All Supabase calls use the JS client library (CDN), not raw fetch
+- Dashboard loads all workout data in one query and groups client-side for simplicity
+
 ## Future Enhancements to Consider
-- Volume tracking (total tonnage per session)
-- Progress charts over time
 - Workout templates / saved routines
 - Bodyweight tracking
-- Rep PR badges
+- Rep PR badges / personal record notifications
 - Export to CSV
+- Volume tracking (total tonnage per session) on dashboard cards
