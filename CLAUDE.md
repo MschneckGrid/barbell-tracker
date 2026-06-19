@@ -13,11 +13,11 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 - **Charts**: Pure canvas rendering (no Chart.js or external chart library)
 
 ## Supabase Details
-- **Project**: Gridiron Performance
-- **Project ID**: `nzinvxticgyjobkqxxhl`
-- **URL**: `https://nzinvxticgyjobkqxxhl.supabase.co`
+- **Project**: sidebet-db
+- **Project ID**: `ztywsgutxxtwwxppvvxo`
+- **URL**: `https://ztywsgutxxtwwxppvvxo.supabase.co`
 - **Table**: `public.workout_sets`
-- **RLS**: Disabled (single-user app)
+- **RLS**: Enabled with anonymous access for the public single-user PWA
 
 ## Database Schema — `workout_sets`
 | Column       | Type        | Constraints / Notes                      |
