@@ -13,11 +13,12 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 - **Charts**: Pure canvas rendering (no Chart.js or external chart library)
 
 ## Supabase Details
-- **Project**: sidebet-db
-- **Project ID**: `ztywsgutxxtwwxppvvxo`
-- **URL**: `https://ztywsgutxxtwwxppvvxo.supabase.co`
+- **Project**: mike@gridironpartners.com's Project (dedicated personal-apps project, isolated from Gridiron Performance and sidebet-db)
+- **Project ID**: `cgneuzcynfechjjhdega`
+- **URL**: `https://cgneuzcynfechjjhdega.supabase.co`
 - **Table**: `public.workout_sets`
-- **RLS**: Enabled with anonymous access for the public single-user PWA
+- **RLS**: Disabled (single-user app, publishable key)
+- **History**: Do NOT host this table in the Gridiron Performance or sidebet-db projects. It previously lived in both; a sidebet-db "drop gridiron cruft" migration (20260720151624) destroyed the table and all workout history on 2026-07-20.
 
 ## Database Schema — `workout_sets`
 | Column       | Type        | Constraints / Notes                      |
@@ -33,7 +34,7 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 | updated_at  | timestamptz | Auto-set on insert/update                |
 
 ## Valid Exercises
-Back Squat, Front Squat, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Hang Clean & Jerk
+Back Squat, Front Squat, Deadlift, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Hang Clean & Jerk
 
 ## Indexes
 - `idx_workout_sets_exercise` — exercise lookups
