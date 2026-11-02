@@ -190,10 +190,15 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
     let currentExercise = '';
     let rowCount = 0;
 
-    // -- Epley 1RM --
+    // -- Epley 1RM, adjusted for submax effort --
+    // Sets are never taken to failure, so assume reps left in the tank.
+    const ASSUMED_RIR = 2;       // reps in reserve added to every set
+    const TREND_MAX_REPS = 5;    // only sets this low-rep count toward 1RM stats/trend
     function calc1RM(weight, reps) {
-      if (reps === 1) return weight;
-      return Math.round(weight * (1 + reps / 30));
+      return Math.round(weight * (1 + (reps + ASSUMED_RIR) / 30));
+    }
+    function countsFor1RM(entry) {
+      return entry.reps <= TREND_MAX_REPS;
     }
 
     // -- Toast --
@@ -261,10 +266,11 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
           const lastSession = entries.filter(e => e.workout_date === lastDate);
           const heaviest = lastSession.reduce((a, b) => Number(a.weight_lbs) >= Number(b.weight_lbs) ? a : b);
 
-          // Best all-time e1RM with the date it was achieved
+          // Best all-time e1RM (low-rep sets only) with the date it was achieved
+          const qualifying = entries.filter(countsFor1RM);
           let best1RM = 0;
           let best1RMDate = '';
-          entries.forEach(e => {
+          qualifying.forEach(e => {
             const e1rm = calc1RM(Number(e.weight_lbs), e.reps);
             if (e1rm > best1RM) {
               best1RM = e1rm;
@@ -272,20 +278,27 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
             }
           });
 
-          // Most recent e1RM (best from the most recent session)
+          // Recent e1RM: best from the most recent session that had a low-rep set
           let recent1RM = 0;
-          lastSession.forEach(e => {
-            const e1rm = calc1RM(Number(e.weight_lbs), e.reps);
-            if (e1rm > recent1RM) recent1RM = e1rm;
-          });
+          if (qualifying.length > 0) {
+            const recentDate = qualifying[0].workout_date;
+            qualifying.filter(e => e.workout_date === recentDate).forEach(e => {
+              const e1rm = calc1RM(Number(e.weight_lbs), e.reps);
+              if (e1rm > recent1RM) recent1RM = e1rm;
+            });
+          }
 
           // Total sets in last session
           const totalSets = lastSession.reduce((s, e) => s + e.sets, 0);
 
           html += '<div class="card-stats">';
           html += `<div class="card-stat">Last: <strong>${Number(heaviest.weight_lbs)} × ${heaviest.reps}</strong></div>`;
-          html += `<div class="card-stat e1rm">Best 1RM: <strong>${best1RM} lbs</strong><span class="e1rm-date">${formatDateShort(best1RMDate)}</span></div>`;
-          html += `<div class="card-stat">Recent 1RM: <strong>${recent1RM} lbs</strong></div>`;
+          if (best1RM > 0) {
+            html += `<div class="card-stat e1rm">Best 1RM: <strong>${best1RM} lbs</strong><span class="e1rm-date">${formatDateShort(best1RMDate)}</span></div>`;
+            html += `<div class="card-stat">Recent 1RM: <strong>${recent1RM} lbs</strong></div>`;
+          } else {
+            html += `<div class="card-stat e1rm">Best 1RM: <strong>—</strong><span class="e1rm-date">needs a set of ${TREND_MAX_REPS} or fewer</span></div>`;
+          }
           html += '</div>';
           html += `<div class="card-meta">${relativeDate(lastDate)} · ${totalSets} set${totalSets !== 1 ? 's' : ''}</div>`;
         } else {
@@ -380,13 +393,13 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
         .order('workout_date', { ascending: true });
 
       if (error || !data || data.length === 0) {
-        container.innerHTML = '<div class="chart-empty">Log 2+ workouts to see trends</div>';
+        container.innerHTML = '<div class="chart-empty">Log 2+ days with a set of 5 reps or fewer to see trends</div>';
         return;
       }
 
-      // Best e1RM per date
+      // Best e1RM per date (low-rep sets only)
       const e1rmByDate = {};
-      data.forEach(d => {
+      data.filter(countsFor1RM).forEach(d => {
         const e1rm = calc1RM(Number(d.weight_lbs), d.reps);
         if (!e1rmByDate[d.workout_date] || e1rm > e1rmByDate[d.workout_date]) {
           e1rmByDate[d.workout_date] = e1rm;
@@ -397,7 +410,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
       const values = Object.values(e1rmByDate);
 
       if (dates.length < 2) {
-        container.innerHTML = '<div class="chart-empty">Log 2+ workouts to see trends</div>';
+        container.innerHTML = '<div class="chart-empty">Log 2+ days with a set of 5 reps or fewer to see trends</div>';
         return;
       }
 
@@ -557,7 +570,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
           html += `
             <div class="history-entry">
               <div class="he-sets-reps">${e.sets} × ${e.reps} @ ${Number(e.weight_lbs)} lbs</div>
-              <div class="he-weight">e1RM ${calc1RM(Number(e.weight_lbs), e.reps)}</div>
+              <div class="he-weight">${countsFor1RM(e) ? `e1RM ${calc1RM(Number(e.weight_lbs), e.reps)}` : 'not in trend'}</div>
               <button class="delete-entry" onclick="deleteEntry(${e.id})" title="Delete">✕</button>
             </div>`;
         });

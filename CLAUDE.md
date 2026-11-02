@@ -69,7 +69,8 @@ Back Squat, Front Squat, Deadlift, Snatch, Push Press, Strict Press, Jerk, Hang 
 - Chart and history re-render on save and delete
 
 ### Key Formulas
-- **Epley 1RM**: `weight * (1 + reps / 30)` — returns raw weight when reps = 1
+- **Adjusted Epley 1RM**: `weight * (1 + (reps + ASSUMED_RIR) / 30)` with `ASSUMED_RIR = 2` (Mike never trains to failure)
+- **1RM stats and trend** (dashboard Best/Recent 1RM, chart) use only sets with reps <= `TREND_MAX_REPS` (5). Higher-rep sets log and show in history as "not in trend".
 - **Relative dates**: Today, Yesterday, N days ago, N weeks ago, N months ago
 
 ## File Structure
