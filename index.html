@@ -102,9 +102,25 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .loading-state { text-align: center; padding: 30px; color: var(--text2); }
+.signin-card { margin: 12px 16px 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: none; }
+.signin-card.show { display: block; }
+.signin-card p { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+.signin-card .row { display: flex; gap: 8px; }
+.signin-card input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--text); }
+.signin-card button { font: inherit; font-weight: 600; font-size: 14px; padding: 10px 14px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer; }
+.signin-card button:disabled { opacity: 0.6; }
   </style>
 </head>
 <body>
+
+  <!-- SIGN-IN (shown when not signed in) -->
+  <div class="signin-card" id="signinCard">
+    <p>Sign in to see and log your workouts. We'll email you a one-time link.</p>
+    <div class="row">
+      <input type="email" id="signinEmail" placeholder="you@example.com" autocomplete="email" inputmode="email">
+      <button id="signinBtn">Email link</button>
+    </div>
+  </div>
 
   <!-- DASHBOARD PAGE -->
   <div class="dashboard-page" id="dashboardPage">
@@ -649,8 +665,33 @@ body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t
       loadHistory();
     });
 
+    // -- Auth --
+    const signinCard = document.getElementById('signinCard');
+    const signinEmail = document.getElementById('signinEmail');
+    const signinBtn = document.getElementById('signinBtn');
+
+    signinBtn.addEventListener('click', async () => {
+      const email = signinEmail.value.trim();
+      if (!email) { signinEmail.focus(); return; }
+      signinBtn.disabled = true;
+      const { error } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin, shouldCreateUser: false }
+      });
+      signinBtn.disabled = false;
+      showToast(error ? 'Could not send link' : 'Check your email for the link');
+    });
+
+    sb.auth.onAuthStateChange((event, session) => {
+      signinCard.classList.toggle('show', !session);
+      if (event === 'SIGNED_IN') loadDashboard();
+    });
+
     // -- Init --
-    loadDashboard();
+    sb.auth.getSession().then(({ data }) => {
+      signinCard.classList.toggle('show', !data.session);
+      loadDashboard();
+    });
 
     // -- Service Worker --
     if ('serviceWorker' in navigator) {
