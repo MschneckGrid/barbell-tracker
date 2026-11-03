@@ -17,7 +17,7 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 - **Project ID**: `cgneuzcynfechjjhdega`
 - **URL**: `https://cgneuzcynfechjjhdega.supabase.co`
 - **Table**: `public.workout_sets`
-- **RLS**: Disabled (single-user app, publishable key)
+- **RLS**: Enabled (2026-11-03). Policy `workout_sets_owner_all` allows only Mike's auth user (mikeschneck@gmail.com, id 75e97010-a886-4e92-9aab-d3afd192dcd8); anon has no grants. The app signs in with a one-time email link (Supabase OTP, `shouldCreateUser: false`); without a session the dashboard shows the sign-in card and no data.
 - **History**: Do NOT host this table in the Gridiron Performance or sidebet-db projects. It previously lived in both; a sidebet-db "drop gridiron cruft" migration (20260720151624) destroyed the table and all workout history on 2026-07-20.
 
 ## Database Schema — `workout_sets`
