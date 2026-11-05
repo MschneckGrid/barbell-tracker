@@ -34,7 +34,7 @@ Mobile-first PWA for tracking barbell training workouts. Logs sets, reps, and we
 | updated_at  | timestamptz | Auto-set on insert/update                |
 
 ## Valid Exercises
-Back Squat, Front Squat, Deadlift, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Hang Clean & Jerk
+Back Squat, Front Squat, Deadlift, Snatch, Push Press, Strict Press, Jerk, Hang Clean, Hang Clean & Jerk, Bent Over Row
 
 ## Indexes
 - `idx_workout_sets_exercise` — exercise lookups
