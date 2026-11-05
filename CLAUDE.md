@@ -117,3 +117,6 @@ git add index.html && git commit -m "feat: description" && git push origin maste
 - Rep PR badges / personal record notifications
 - Export to CSV
 - Volume tracking (total tonnage per session) on dashboard cards
+
+## 2026-11-05: Sign-in removed
+Email sign-in removed at Mike's request (magic link redirected to another app). RLS stays on; policy `workout_sets_anon_all` grants anon full access. App opens straight to data, no login.
